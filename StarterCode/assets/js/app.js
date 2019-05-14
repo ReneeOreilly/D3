@@ -19,33 +19,65 @@ var svg = d3.select("body")
 var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
     
-d3.csv("assets/data/data.csv", function(error, ACSdata) {
-    if (error) throw error;
-    console.log(ACSdata);
+d3.csv("assets/data/data.csv", function(ACSdata) {
+        ACSdata.healthcare = +ACSdata.healthcare;
+        ACSdata.poverty = +ACSdata.poverty;
+        return ACSdata;
+    }).then(function(ACSdata) {
+        console.log(ACSdata);
+      
+        var xLinearScale = d3.scaleLinear()
+        .domain(d3.extent(ACSdata, data => data.poverty))
+        .range([2, chartWidth]);
 
-ACSdata.forEach(function(data){
-    data.poverty = +data.poverty;
-    data.smokes = +data.smokes;
-});
+    var yLinearScale = d3.scaleLinear()
+        .domain([4, d3.max(ACSdata, data => data.healthcare)])
+        .range([chartHeight, 0]);
 
-var xTimeScale = d3.scaleTime()
-    .range([0, chartWidth])
-    .domain(ACSdata.map(data => data.poverty));
+    var bottomAxis = d3.axisBottom(xLinearScale);
+    var leftAxis = d3.axisLeft(yLinearScale);
+    
+    chartGroup.append("g")
+        .classed("axis", true)
+        .call(leftAxis);
+    
+    chartGroup.append("g")
+        .classed("axis", true)
+        .attr("transform", `translate(0, ${chartHeight})`)
+        .call(bottomAxis);    
 
-var yLinearScale = d3.scaleLinear()
-    .range([chartHeight, 0])
-    .domain([0, d3.max(ACSdata, data => data.smokes)]);
 
-var bottomAxis = d3.axisBottom(xTimeScale);
-var leftAxis = d3.axisLeft(yLinearScale);
+    chartGroup.selectAll("circle")
+        .data(ACSdata)
+        .enter()
+        .append("circle")
+        .attr("cx", data => xLinearScale(data.poverty))
+        .attr("cy", data => yLinearScale(data.healthcare))
+        .attr("r", "15")
+        .attr("opacity", ".5")
+        .classed("stateCircle", true);
+        console.log(ACSdata);
 
-chartGroup.append("g")
-    .classed("axis", true)
-    .call(leftAxis);
+    chartGroup.selectAll("text")
+        .data(ACSdata)
+        .enter()
+        .append("text")
+        .attr("x", data => xLinearScale(data.poverty))
+        .attr("y", data => yLinearScale(data.healthcare))
+        .text(function(ACSdata){return ACSdata.abbr})
+        .classed("statetext", true);
 
-chartGroup.append("g")
-    .classed("axis", true)
-    .attr("transform", "translate(0, " + chartHeight + ')')
-    .call(bottomAxis)    
-});
 
+        chartGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left + 20)
+        .attr("x", 0 - (chartHeight / 2))
+        .attr("class", "aText")
+        .text("Healthcare (%)");
+
+    chartGroup.append("text")
+        .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + margin.top -20})`)
+        .attr("class", "aText")
+        .text("Poverty (%)");
+
+    });
