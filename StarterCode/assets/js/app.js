@@ -27,11 +27,11 @@ d3.csv("assets/data/data.csv", function(ACSdata) {
         console.log(ACSdata);
       
         var xLinearScale = d3.scaleLinear()
-        .domain(d3.extent(ACSdata, data => data.poverty))
-        .range([2, chartWidth]);
+        .domain([6, d3.max(ACSdata, data => data.poverty)])
+        .range([0, chartWidth]);
 
     var yLinearScale = d3.scaleLinear()
-        .domain([4, d3.max(ACSdata, data => data.healthcare)])
+        .domain([0, d3.max(ACSdata, data => data.healthcare)])
         .range([chartHeight, 0]);
 
     var bottomAxis = d3.axisBottom(xLinearScale);
@@ -47,25 +47,32 @@ d3.csv("assets/data/data.csv", function(ACSdata) {
         .call(bottomAxis);    
 
 
-    chartGroup.selectAll("circle")
-        .data(ACSdata)
-        .enter()
-        .append("circle")
-        .attr("cx", data => xLinearScale(data.poverty))
-        .attr("cy", data => yLinearScale(data.healthcare))
-        .attr("r", "15")
-        .attr("opacity", ".5")
-        .classed("stateCircle", true);
-        console.log(ACSdata);
+    var circles = svg.selectAll("g circles")
+    .data(ACSdata)
+    .enter();
 
-    chartGroup.selectAll("text")
-        .data(ACSdata)
-        .enter()
-        .append("text")
-        .attr("x", data => xLinearScale(data.poverty))
-        .attr("y", data => yLinearScale(data.healthcare))
-        .text(function(ACSdata){return ACSdata.abbr})
-        .classed("statetext", true);
+        
+            // .data(ACSdata)
+            // .enter()
+            circles.append("circle")
+                .attr("cx", data => xLinearScale(data.poverty))
+                .attr("cy", data => yLinearScale(data.healthcare))
+                .attr("r", "15")
+                .attr("opacity", ".5")
+                .classed("stateCircle", true);
+            circles.append("text")
+                .attr("cx", data => xLinearScale(data.poverty))
+                .attr("cy", data => yLinearScale(data.healthcare))
+                .text(function(data){console.log(data); return data.abbr})
+                .classed("statetext", true);
+                console.log(ACSdata);
+
+    // chartGroup.selectAll("text")
+    //     .data(ACSdata)
+    //     .enter()
+    //     .append("text")
+        
+    //     console.log(ACSdata);
 
 
         chartGroup.append("text")
