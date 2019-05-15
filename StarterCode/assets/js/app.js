@@ -31,7 +31,7 @@ d3.csv("assets/data/data.csv", function(ACSdata) {
         .range([0, chartWidth]);
 
     var yLinearScale = d3.scaleLinear()
-        .domain([0, d3.max(ACSdata, data => data.healthcare)])
+        .domain([0, d3.max(ACSdata, data => data.healthcare)+10])
         .range([chartHeight, 0]);
 
     var bottomAxis = d3.axisBottom(xLinearScale);
@@ -47,24 +47,26 @@ d3.csv("assets/data/data.csv", function(ACSdata) {
         .call(bottomAxis);    
 
 
-    var circles = svg.selectAll("g circles")
+    var circles = svg.selectAll("g.circles")
     .data(ACSdata)
     .enter();
 
         
             // .data(ACSdata)
             // .enter()
+           
             circles.append("circle")
                 .attr("cx", data => xLinearScale(data.poverty))
                 .attr("cy", data => yLinearScale(data.healthcare))
                 .attr("r", "15")
                 .attr("opacity", ".5")
                 .classed("stateCircle", true);
+    
             circles.append("text")
-                .attr("cx", data => xLinearScale(data.poverty))
-                .attr("cy", data => yLinearScale(data.healthcare))
+                .attr("x", data => xLinearScale(data.poverty))
+                .attr("y", data => yLinearScale(data.healthcare))
                 .text(function(data){console.log(data); return data.abbr})
-                .classed("statetext", true);
+                .classed("stateText", true);
                 console.log(ACSdata);
 
     // chartGroup.selectAll("text")
